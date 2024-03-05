@@ -24,8 +24,14 @@ public class JavaTcpClient {
             messageHandler message = new messageHandler(socket);
 
 
-            new Thread(inputing).run();
-            new Thread(message).run();
+            Thread inputThread = new Thread(inputing);
+            Thread messageThread = new Thread(message);
+
+            inputThread.start();
+            messageThread.start();
+
+            inputThread.join();
+            messageThread.join();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -54,7 +60,7 @@ public class JavaTcpClient {
                 
                 // choose client option
                 do {
-                    System.out.print("[CLIENT]>>");
+                    System.out.print(">>");
                     input = scanner.next().charAt(0);
 
                     switch (input) {
@@ -103,13 +109,14 @@ public class JavaTcpClient {
 
         @Override
         public void run() {
-        
             try (
                 BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
                 
                 while(true){
                     String response = in.readLine();
-                    System.out.println("received response: " + response);
+                    if(response != null){
+                        System.out.println("\n" + response);
+                    }
                 }
 
 

@@ -13,6 +13,8 @@ public class JavaTcpServer {
     static HashMap<Integer, Socket> clients = new HashMap<>();
     private static int clientsNum = 0;
     
+
+    // main
     public static void main(String[] args) throws IOException {
 
         System.out.println("JAVA TCP SERVER");
@@ -27,16 +29,20 @@ public class JavaTcpServer {
 
                 // accept client
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("client connected " + 
+                System.out.println("client" + clientsNum + " connected " + 
                                     clientSocket.getInetAddress() 
                                                 .getHostAddress());
 
-
                 // handle client and create thread
                 clients.put(clientsNum, clientSocket);
-                ClientHandler client = new ClientHandler(clientSocket);
+                ClientHandler client = new ClientHandler(clientSocket, clientsNum);
 
                 new Thread(client).start();
+
+                // increase the client incex
+                clientsNum++;
+
+                
 
             }
 
@@ -49,15 +55,36 @@ public class JavaTcpServer {
             }
         }
     }
+    // Send TCP message one to all
+    private static void handleTcpMessage(int senderID, String message) throws IOException{
+
+        for (Integer key : clients.keySet()){
+            if (!key.equals(senderID)) {
+                Socket socket = clients.get(key);
+                try (
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+                        out.println("[CLIENT " + senderID + "] " + message);
+                        
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            } 
+            
+        }
+    }
 
 
-
+    // TCP Thread for the single client
     private static class ClientHandler implements Runnable {
 
         private final Socket clientSocket;
+        private int clientIndex;
 
-        public ClientHandler(Socket socket){
+        public ClientHandler(Socket socket, int index){
             clientSocket = socket;
+            clientIndex = index;
         }
 
 
@@ -68,10 +95,17 @@ public class JavaTcpServer {
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
                 // read msg, send response
-                String msg = in.readLine();
-                System.out.println("received msg: " + msg);
-                out.println("Pong Java Tcp");
-                
+                while (true) {
+                    String msg = in.readLine();
+                    if (msg != null) {
+                        System.out.println("[CLIENT " + clientIndex + "] " +  msg);
+                        out.println("[SERVER] Pong Java Tcp");
+
+                        handleTcpMessage(clientIndex, msg);
+                    }
+
+                    
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
