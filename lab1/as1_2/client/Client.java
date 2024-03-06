@@ -5,8 +5,6 @@ public class Client {
     int portNumber;
     String hostName;
 
-    InputConsole console = new InputConsole();
-
     public Client(int portNumber, String hostName){
         this.portNumber = portNumber;
         this.hostName = hostName;
@@ -15,10 +13,17 @@ public class Client {
     public void run() throws InterruptedException {
 
         ClientTcpChannel tcpChannel = new ClientTcpChannel(portNumber, hostName);
+        tcpChannel.createSocket();
+        
+        InputConsole inputConsole = new InputConsole(tcpChannel);
+        Thread console = new Thread(inputConsole);
 
-        Thread tcp = new Thread(tcpChannel);
+        console.start();
 
-        tcp.start();
+        tcpChannel.run();        
+
+        console.join();
+
 
     }
 

@@ -2,15 +2,21 @@ package client;
 
 import java.util.Scanner;
 
-public class InputConsole {
+public class InputConsole implements Runnable{
     
     String userPrefix = ">>";
 
     Scanner scanner = new Scanner(System.in);
     char input;
 
+    ClientTcpChannel tcpChannel;
 
-    public void start() {
+    public InputConsole(ClientTcpChannel tcpChannel) {
+        this.tcpChannel = tcpChannel;
+    }
+
+    @Override
+    public void run() {
         
         do {
             System.out.print(">>");
@@ -19,6 +25,7 @@ public class InputConsole {
             switch (input) {
                 // TCP communication
                 case 't':
+                    tcpChannel.sendMessageToServer();
                     System.out.println("t");
                     break;
                 
