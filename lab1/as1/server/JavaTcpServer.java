@@ -60,16 +60,16 @@ public class JavaTcpServer {
 
         for (Integer key : clients.keySet()){
             if (!key.equals(senderID)) {
-                Socket socket = clients.get(key);
+                Socket clientSocket = clients.get(key);
+            
                 try (
-                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
                         out.println("[CLIENT " + senderID + "] " + message);
-                        
 
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
+                
             } 
             
         }
@@ -97,16 +97,23 @@ public class JavaTcpServer {
                 // read msg, send response
                 while (true) {
                     String msg = in.readLine();
+                    
                     if (msg != null) {
                         System.out.println("[CLIENT " + clientIndex + "] " +  msg);
                         out.println("[SERVER] Pong Java Tcp");
 
                         handleTcpMessage(clientIndex, msg);
+                    } else {
+                        break;
                     }
-
-                    
                 }
+                
+                System.out.println("[CLIENT " + clientIndex + "] socked closed");
+
+
             } catch (IOException e) {
+                // isSocketClosed = true;
+                // 
                 e.printStackTrace();
             }
         }

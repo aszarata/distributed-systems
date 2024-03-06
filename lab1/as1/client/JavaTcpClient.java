@@ -86,7 +86,7 @@ public class JavaTcpClient {
                             break;
                     
                         default:
-                        System.out.println("Error");
+                            System.out.println("Error");
                             break;
                     }
 
