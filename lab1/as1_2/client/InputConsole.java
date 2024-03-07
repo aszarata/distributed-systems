@@ -4,48 +4,49 @@ import java.util.Scanner;
 
 public class InputConsole implements Runnable{
     
-    String userPrefix = ">>";
+    String userPrefix = "";
 
     Scanner scanner = new Scanner(System.in);
     char input;
 
     ClientTcpChannel tcpChannel;
+    ClientUdpChannel udpChannel;
 
-    public InputConsole(ClientTcpChannel tcpChannel) {
+    public InputConsole(ClientTcpChannel tcpChannel, ClientUdpChannel udpChannel) {
         this.tcpChannel = tcpChannel;
+        this.udpChannel = udpChannel;
     }
 
     @Override
     public void run() {
-        
+
+        System.out.println("CLIENT\n");
         do {
-            System.out.print(">>");
+            System.out.print(userPrefix);
             input = scanner.next().charAt(0);
 
             switch (input) {
                 // TCP communication
                 case 't':
                     tcpChannel.sendMessageToServer();
-                    System.out.println("t");
                     break;
                 
                 // UDP communication
                 case 'u':
-                    System.out.println("u");
+                    udpChannel.sendMessageToServer();
                     break;
 
                 // Multicast communication
                 case 'm':
-                    System.out.println("m");
+                    udpChannel.sendMulticastMessage();
                     break;
 
                 // Exit
                 case 'e':
-                    System.out.println("e");
                     break;
             
                 default:
-                    System.out.println("Error");
+                    System.out.println("Invalid character. Try using:\nt - TCP message to server\nu - UDP message to server\nm - multicast UDP message to other clients\ne - exit.");
                     break;
             }
 

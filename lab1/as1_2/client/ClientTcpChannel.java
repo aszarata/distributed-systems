@@ -6,18 +6,25 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class ClientTcpChannel{
-
-    int portNumber;
+public class ClientTcpChannel implements ClientChannel{
+    // connection with server
+    int serverPortNumber;
     String hostName;
 
     Socket socket = null;
 
-    public ClientTcpChannel( int portNumber, String hostName ) {
-        this.portNumber = portNumber;
+    // menager for the content of messages
+    MessageMenager messageMenager = new MessageMenager();
+
+    // bool for interrupting the thread
+    private boolean running = true;
+
+    public ClientTcpChannel( int serverPortNumber, String hostName ) {
+        this.serverPortNumber = serverPortNumber;
         this.hostName = hostName;
     }
 
+    @Override
     public void run() throws InterruptedException {
 
         MessageHandler messageHandler = new MessageHandler();
@@ -25,26 +32,35 @@ public class ClientTcpChannel{
         Thread messageThread = new Thread(messageHandler);
 
         messageThread.start();
-        
-        messageThread.join();
-        
-            
 
     }
 
-    public void createSocket(){
+    @Override
+    public void close() {
+        running = false; // ending the threads  
+        try {          
+            socket.close();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void createSocket() {
         try {
-            socket = new Socket(hostName, portNumber);
+            socket = new Socket(hostName, serverPortNumber);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    @Override
     public void sendMessageToServer() {
 
-        try (
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
-                out.println("Ping Java Tcp");
+        try {
+
+            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+            out.println(messageMenager.tcpMessage());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -52,16 +68,18 @@ public class ClientTcpChannel{
 
     }
 
-    public class MessageHandler implements Runnable {
+    private class MessageHandler implements Runnable {
 
         @Override
         public void run() {
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
-            ) {
-                while(true){
+            try {
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                while(running){
                     String response = in.readLine();
+
                     if(response != null){
-                        System.out.println("\n" + response);
+                        System.out.println(response);
                     }
                 }
             } catch (IOException e) {
@@ -71,5 +89,8 @@ public class ClientTcpChannel{
 
     }
 
+    public int getLocalPort(){
+        return socket.getLocalPort();
+    }
     
 }

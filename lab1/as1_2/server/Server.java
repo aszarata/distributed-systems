@@ -12,7 +12,6 @@ public class Server {
     Logger logger = new Logger();
 
     private HashMap<Integer, Socket> clients = new HashMap<>();
-    private int clientsNum = 0;
 
     public Server(int portNumber, String hostName) {
         this.portNumber = portNumber;
@@ -24,15 +23,18 @@ public class Server {
         logger.start();
         try {
         
-            // create tcp chanel
+            // create tcp and udp chanel
             ServerTcpChannel tcpChannel = new ServerTcpChannel(this);
+            ServerUdpChannel udpChannel = new ServerUdpChannel(this);
 
             Thread tcp = new Thread(tcpChannel);
+            Thread udp = new Thread(udpChannel);
 
             tcp.start();
+            udp.start();
 
-        
             tcp.join();
+            udp.join();
 
 
         } catch (InterruptedException e) {
@@ -41,15 +43,20 @@ public class Server {
     }
 
     public int addClient(Socket socket) {
+
+        int clientLocalPort = socket.getPort();
+        clients.put(clientLocalPort, socket);
+
         
-        clients.put(clientsNum, socket);
-        clientsNum++;
-        
-        return clientsNum - 1;
+        return clientLocalPort;
     }
 
     public HashMap<Integer, Socket> getClients() {
         return clients;
+    }
+
+    public void removeClient(int clientID) {
+        clients.remove(clientID);
     }
 
     public int getPortNumber() {
@@ -59,5 +66,4 @@ public class Server {
     public Logger getLogger() {
         return logger;
     }
-
 }

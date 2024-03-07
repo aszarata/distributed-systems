@@ -16,12 +16,12 @@ public class ServerTcpChannel implements Runnable{
     
     ServerSocket serverTcpSocket = null;
 
-    Logger logger;
+    static Logger logger;
     
     public ServerTcpChannel(Server mainServer){
         server = mainServer;
         portNumber = server.getPortNumber();
-        this.logger = server.getLogger();
+        logger = server.getLogger();
     }
 
 
@@ -41,6 +41,9 @@ public class ServerTcpChannel implements Runnable{
                 // handle client and create thread
                 int clientIndex = server.addClient(clientSocket);
                 ClientHandler client = new ClientHandler(clientSocket, clientIndex);
+
+                logger.logClient(clientIndex,  clientSocket.getInetAddress() 
+                                                            .getHostAddress());
 
                 new Thread(client).start();
 
@@ -63,9 +66,9 @@ public class ServerTcpChannel implements Runnable{
                 
                 Socket clientSocket = clients.get(key);
             
-                try (
-                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
-                        out.println("[CLIENT " + senderID + "] " + message);
+                try {
+                    PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+                    out.println( logger.directedMessage(message, senderID) );
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -97,7 +100,9 @@ public class ServerTcpChannel implements Runnable{
                     String msg = in.readLine();
                     
                     if (msg != null) {
-                        out.println("[SERVER] Pong Java Tcp");
+
+                        logger.displayMssage(msg, clientIndex);
+                        out.println(logger.tcpReply());
 
                         handleTcpMessage(clientIndex, msg);
                     } else {
@@ -105,7 +110,8 @@ public class ServerTcpChannel implements Runnable{
                     }
                 }
                 
-                System.out.println("[CLIENT " + clientIndex + "] socked closed");
+                logger.displayLogout(clientIndex);
+                server.removeClient(clientIndex);
 
 
             } catch (IOException e) {
