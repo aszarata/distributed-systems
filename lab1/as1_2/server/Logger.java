@@ -18,7 +18,7 @@ public class Logger {
     }
 
     public void logClient(int index, String address) {
-        System.out.println(serverPrefix + address + " logged in as CLIENT" + index);
+        System.out.println(serverPrefix + address + " logged in as CLIENT " + index);
     }
 
     public void displayMssage(String message, int senderID) {

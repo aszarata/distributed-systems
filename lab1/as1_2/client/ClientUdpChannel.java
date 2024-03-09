@@ -120,7 +120,8 @@ public class ClientUdpChannel implements ClientChannel{
                 }
 
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("UDP Channel Closed");
+                // e.printStackTrace();
             }
             
         }    
@@ -159,10 +160,12 @@ public class ClientUdpChannel implements ClientChannel{
 
                     String msg = new String(receivePacket.getData(), 0, receivePacket.getLength());
                     System.out.println(msg);
+                    
                 }
 
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("Multicast UDP Channel Closed");
+                // e.printStackTrace();
             }
             
         }    

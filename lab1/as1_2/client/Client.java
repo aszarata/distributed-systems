@@ -35,7 +35,7 @@ public class Client {
         console.join();
 
         // close nertwork channels
-        // tcpChannel.close();
+        tcpChannel.close();
         udpChannel.close();
 
     }

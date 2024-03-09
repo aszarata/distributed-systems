@@ -83,7 +83,8 @@ public class ClientTcpChannel implements ClientChannel{
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("TCP Channel Closed");
+                // e.printStackTrace();
             }
         }
 
